@@ -1,0 +1,140 @@
+env:
+  global:
+    - REPO_DIR=py_slvs
+    - BUILD_COMMIT=90f2f9005c9e102d7de6dd3e8407d820c08dbcc4
+    - PLAT=x86_64
+    - UNICODE_WIDTH=32
+    - REPO=https://upload.pypi.org/legacy/
+    - TEST_REPO=https://test.pypi.org/legacy/
+    - PYPI_USERNAME=realthunder
+    - secure: "vLxi7ZRo9sMv0gpz0cYbOTloqxb9QaIGkiJZtS9DxuFw/Di5cGCCvuJ2j0r4Thu9IPanXzpdO2qSich2IwnEHxiOy0VTGWEE3tLnxgIwZN47GWpKnhBkF7RJUia94ROwVmDYz9ODOynG/h+RKUq4PH0nPLmWKDP39UubTbk0ghZw4uihjev1/bxuX/oEscN1XQMPU3iq87URkz83TGeTcS2TmIheKZ++B82CQcA6SmMKcs0Lr/dgxnRG5se0Z3c5MblECSvIB/fpPtr7lXmu6XcAP9jvThhFDb40x5ohNJay+t/fqdlswmJQut7zjxV7rtf98RSZILj4rYBLDCaKMetAx1zkGoZ8in1busdjyGYctgM6YrqkPWefA/IFn3qfbAdJZm6dDqf6Io9qd4/6N6yaAJovrxrrzZKAhxIcX7VhdhSMp3Jd8Ukcp9EQfPOIMdJFv7p51p3r9ZFBk3ZoV7sXf18vx1T2+53GBoFs3k2i4ViXbh9/QlnBc2YzuUpw0lm3zMxDRcE6KIjwu8W1I/03X/VGNoU7sWDukIadnSPl/VfNdgV9Gw5ADHwCkqRZHSy2/uiWXOL7C3LqmetAXrrBrgUPwUGhAv6dYXLhv3rzC+r68p4SQIm3NFUOzgmTkJEGrgU12SRnT2cBr4KEUvFnGpOvTAGIRiAmkfOypXY="
+
+language: python
+# Default Python version is usually 2.7
+python: 3.5
+sudo: required
+dist: trusty
+services: docker
+# Force xcode 6.4 image to work round
+# https://github.com/python-pillow/pillow-wheels/issues/45
+# So we have the line below for OSX builds
+# osx_image: xcode9.3beta
+matrix:
+  # Exclude the default Python 3.5 build
+  exclude:
+  - python: 3.5
+  include:
+  - os: osx
+    language: generic
+    sudo: required
+    osx_image: xcode9.3beta
+    env:
+      - MB_PYTHON_VERSION=3.5
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: osx
+    language: generic
+    sudo: required
+    osx_image: xcode9.3beta
+    env:
+      - MB_PYTHON_VERSION=3.6
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: osx
+    language: generic
+    sudo: required
+    osx_image: xcode9.3beta
+    env:
+      - MB_PYTHON_VERSION=3.7
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: osx
+    language: generic
+    sudo: required
+    osx_image: xcode9.3beta
+    env:
+      - MB_PYTHON_VERSION=2.7
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=2.7 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=2.7 
+      - UNICODE_WIDTH=16 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=2.7 
+      - PLAT=i686 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=2.7 
+      - UNICODE_WIDTH=16 
+      - PLAT=i686 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.5 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.6 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.7 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.5 
+      - PLAT=i686 
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.6 
+      - PLAT=i686
+  - os: linux 
+    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.7 
+      - PLAT=i686
+
+before_install:
+  - source multibuild/common_utils.sh;
+  - source multibuild/travis_steps.sh;
+  - before_install;
+
+install:
+  - clean_code $REPO_DIR $BUILD_COMMIT;
+  - build_wheel $REPO_DIR $PLAT;
+
+script:
+  - install_run $PLAT
+
+after_success:
+- >
+  if [ -n "$TRAVIS_TAG" ]; then
+    pip install twine;
+    pip install pyOpenSSL ndg-httpsclient pyasn1 || true;
+    python -m twine upload --skip-existing ${TRAVIS_BUILD_DIR}/wheelhouse/*.whl --repository-url $REPO -u $PYPI_USERNAME -p $PYPI_PASSWORD ;
+    echo "Deployed to PyPI.";
+  else
+    echo "Not deploying as not a tagged commit.";
+  fi
+- >
+  if [ "$TRAVIS_BRANCH" == "pypi_test" ]; then
+    pip install twine;
+    pip install pyOpenSSL ndg-httpsclient pyasn1 || true;
+    ls ${TRAVIS_BUILD_DIR}/wheelhouse/;
+    python -m twine upload --skip-existing ${TRAVIS_BUILD_DIR}/wheelhouse/*.whl --repository-url $TEST_REPO -u $PYPI_USERNAME -p $PYPI_PASSWORD ;
+    echo "Deployed to test PyPI.";
+  else
+    echo "Not deploying as not a commit on test branch.";
+  fi
+
+cache:
+- timeout: 300
+- directories:
+  - "$BUILD_CCACHE_DIR"
+  - "$HOME/.ccache"
