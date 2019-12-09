@@ -2,6 +2,8 @@ env:
   global:
     - REPO_DIR=py_slvs
     - BUILD_COMMIT=90f2f9005c9e102d7de6dd3e8407d820c08dbcc4
+    - BUILD_DEPENDS="cython cmake scikit-build"
+    - TEST_DEPENDS=pytest
     - PLAT=x86_64
     - UNICODE_WIDTH=32
     - REPO=https://upload.pypi.org/legacy/
@@ -12,7 +14,6 @@ env:
 language: python
 # Default Python version is usually 2.7
 python: 3.5
-sudo: required
 dist: trusty
 services: docker
 # Force xcode 6.4 image to work round
@@ -138,3 +139,5 @@ cache:
 - directories:
   - "$BUILD_CCACHE_DIR"
   - "$HOME/.ccache"
+  - "$HOME/.cache/pcre"
+  - "$HOME/.cache/swig"
