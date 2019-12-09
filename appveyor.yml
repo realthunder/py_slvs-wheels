@@ -4,7 +4,9 @@ version: 1.0.{build}
 
 # build all branches by default
 
-image: Visual Studio 2017
+image:
+  - Visual Studio 2017
+  - Visual Studio 2013
 platform: x64
 configuration: Release
 
@@ -19,13 +21,23 @@ environment:
   PYPI_USERNAME: realthunder
 
   matrix:
-  # - PYTHON_VERSION_MAJOR: 2
-  #   PYTHON_VERSION_MINOR: 7
-  #   CONDA_PREFIX: C:\Miniconda
-  #
-  # - PYTHON_VERSION_MAJOR: 2
-  #   PYTHON_VERSION_MINOR: 7
-  #   CONDA_PREFIX: C:\Miniconda-x64
+  - PYTHON_VERSION_MAJOR: 2
+    PYTHON_VERSION_MINOR: 7
+    PY_PREFIX: C:\Python27
+    CMAKE_GENERATOR: "Visual Studio 12 2013"
+
+  - PYTHON_VERSION_MAJOR: 2
+    PYTHON_VERSION_MINOR: 7
+    PY_PREFIX: C:\Python27-x64
+    CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 5
+    CONDA_PREFIX: C:\Miniconda35
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 5
+    CONDA_PREFIX: C:\Miniconda35-x64
 
   - PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 6
@@ -35,14 +47,6 @@ environment:
     PYTHON_VERSION_MINOR: 6
     CONDA_PREFIX: C:\Miniconda36-x64
 
-  # - PYTHON_VERSION_MAJOR: 3
-  #   PYTHON_VERSION_MINOR: 5
-  #   CONDA_PREFIX: C:\Miniconda35
-  #
-  # - PYTHON_VERSION_MAJOR: 3
-  #   PYTHON_VERSION_MINOR: 5
-  #   CONDA_PREFIX: C:\Miniconda35-x64
-  
   - PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 7
     CONDA_PREFIX: C:\Miniconda37
@@ -51,39 +55,68 @@ environment:
     PYTHON_VERSION_MINOR: 7
     CONDA_PREFIX: C:\Miniconda37-x64
 
-install:
-- cmd: set repo_dir=py_slvs
-- cmd: set build_commit=90f2f9005c9e102d7de6dd3e8407d820c08dbcc4
-- cmd: git submodule update --init --recursive
-- cmd: cd %repo_dir%
-- cmd: git fetch origin
-- cmd: git checkout %build_commit%
-- cmd: git clean -fxd
-- cmd: git reset --hard
+matrix:
+  exclude:
+  - image: Visual Studio 2013 
+    PYTHON_VERSION_MAJOR: 3
+  - image: Visual Studio 2017 
+    PYTHON_VERSION_MAJOR: 2
 
-before_build:
-- cmd: SET PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
-- cmd: SET _prefix=%CONDA_PREFIX:~0,14%
-- >
-  IF "%_prefix%"=="C:\Miniconda37"
-  (
-  conda install -y -c conda-forge swig &&
-  set "PATH=%PATH%;%CONDA_PREFIX%\Library\bin"
-  )
-  ELSE
-  (
-  conda install -y -c conda-forge swig
-  )
-- cmd: pip install --quiet pytest cmake scikit-build
+for:
+-
+  matrix:
+    only:
+    - PYTHON_VERSION_MAJOR: 2
+  before_build:
+  - set PATH=%PY_PREFIX%;%PY_PREFIX%/Scripts;%PATH% 
+  - pip install --quiet scikit-build
+  - curl -Lfso swig.zip https://downloads.sourceforge.net/project/swig/swigwin/swigwin-4.0.1/swigwin-4.0.1.zip
+  - 7z x swig.zip -y
+  - move swigwin-4.0.1 C:\
+  - set PATH=C:\swigwin-4.0.1;%PATH%
+-
+  matrix:
+    only:
+    - PYTHON_VERSION_MAJOR: 3
+      PYTHON_VERSION_MINOR: 5
+  before_build:
+  - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
+  - set _prefix=%CONDA_PREFIX:~0,14%
+  - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
+  - conda install -y -c conda-forge --no-update-deps swig=3.0.12
+  - pip install --quiet setuptools scikit-build
+-
+  matrix:
+    only:
+    - PYTHON_VERSION_MAJOR: 3
+    except:
+    - PYTHON_VERSION_MINOR: 5
+  before_build:
+  - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
+  - set _prefix=%CONDA_PREFIX:~0,14%
+  - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
+  - conda install -y -c conda-forge swig
+  - pip install --quiet scikit-build
+
+install:
+- set repo_dir=py_slvs
+- set build_commit=4b140c34997e3b08527da7288e05cc2d3c8cd9f4
+- git submodule update --init %repo_dir%
+- cd %repo_dir%
+- git fetch origin
+- git checkout %build_commit%
+- git clean -fxd
+- git reset --hard
+- git submodule update --init slvs
 
 build_script:
 # Build and test onnx.
-- cmd: cd c:\projects\py_slvs-wheels\py_slvs
-- cmd: python setup.py bdist_wheel --universal --dist-dir .
-- cmd: pip uninstall -y py_slvs || ver>nul
-- cmd: dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
-- cmd: pip install %_wheel%
-- cmd: python -c "import py_slvs"
+- cd c:\projects\py_slvs-wheels\py_slvs
+- python setup.py bdist_wheel --universal --dist-dir .
+- pip uninstall -y py_slvs || ver>nul
+- dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
+- pip install %_wheel%
+- python -c "import py_slvs"
 
 artifacts:
   - path: 'py_slvs\*.whl'
@@ -91,15 +124,11 @@ artifacts:
 
 # publish artifacts
 after_test:
-- cmd: set REPO=https://upload.pypi.org/legacy/
-- cmd: set TESTREPO=https://test.pypi.org/legacy/
-- cmd: set USERNAME=%PYPI_USERNAME%
-# The package twine requires python >= 3.6, so
-# we upgrade python before doing anything related
-# to twine. Note that twine is only for publishing
-# packages, so this change won't affect the package
-# we built.
-- cmd: conda upgrade -y python
+- set REPO=https://upload.pypi.org/legacy/
+- set TESTREPO=https://test.pypi.org/legacy/
+- set USERNAME=%PYPI_USERNAME%
+# force use python 3.7 for twine (because it requires python>=3.6)
+- set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
 # Ensure only master branch can trigger build
 - >
   IF "%APPVEYOR_REPO_BRANCH%" == "master"
@@ -118,4 +147,4 @@ after_test:
   set HOME=%USERPROFILE% &&
   python -m twine upload --verbose --skip-existing %_wheel% --repository-url %TESTREPO% -u %USERNAME% -p %PYPI_PASSWORD%
   )
-- cmd: echo TASK COMPLETED
+- echo TASK COMPLETED
