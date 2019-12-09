@@ -1,0 +1,121 @@
+# reference: https://www.appveyor.com/docs/appveyor-yml/
+
+version: 1.0.{build}
+
+# build all branches by default
+
+image: Visual Studio 2017
+platform: x64
+configuration: Release
+
+clone_folder: c:\projects\py_slvs-wheels
+clone_depth: 3
+
+# pick as per https://www.appveyor.com/docs/build-environment/#python
+environment:
+  PYPI_PASSWORD:
+    secure: ubqvSWQzaXFiM5XOaavYRQ==
+  
+  PYPI_USERNAME: realthunder
+
+  matrix:
+  # - PYTHON_VERSION_MAJOR: 2
+  #   PYTHON_VERSION_MINOR: 7
+  #   CONDA_PREFIX: C:\Miniconda
+  #
+  # - PYTHON_VERSION_MAJOR: 2
+  #   PYTHON_VERSION_MINOR: 7
+  #   CONDA_PREFIX: C:\Miniconda-x64
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 6
+    CONDA_PREFIX: C:\Miniconda36
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 6
+    CONDA_PREFIX: C:\Miniconda36-x64
+
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 5
+  #   CONDA_PREFIX: C:\Miniconda35
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 5
+  #   CONDA_PREFIX: C:\Miniconda35-x64
+  
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 7
+    CONDA_PREFIX: C:\Miniconda37
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 7
+    CONDA_PREFIX: C:\Miniconda37-x64
+
+install:
+- cmd: set repo_dir=py_slvs
+- cmd: set build_commit=90f2f9005c9e102d7de6dd3e8407d820c08dbcc4
+- cmd: git submodule update --init --recursive
+- cmd: cd %repo_dir%
+- cmd: git fetch origin
+- cmd: git checkout %build_commit%
+- cmd: git clean -fxd
+- cmd: git reset --hard
+
+before_build:
+- cmd: SET PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
+- cmd: SET _prefix=%CONDA_PREFIX:~0,14%
+- >
+  IF "%_prefix%"=="C:\Miniconda37"
+  (
+  conda install -y -c conda-forge swig &&
+  set "PATH=%PATH%;%CONDA_PREFIX%\Library\bin"
+  )
+  ELSE
+  (
+  conda install -y -c conda-forge swig
+  )
+- cmd: pip install --quiet pytest cmake scikit-build
+
+build_script:
+# Build and test onnx.
+- cmd: cd c:\projects\py_slvs-wheels\py_slvs
+- cmd: python setup.py bdist_wheel --universal --dist-dir .
+- cmd: pip uninstall -y py_slvs || ver>nul
+- cmd: dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
+- cmd: pip install %_wheel%
+- cmd: python -c "import py_slvs"
+
+artifacts:
+  - path: 'py_slvs\*.whl'
+    name: PySlvsWheel
+
+# publish artifacts
+after_test:
+- cmd: set REPO=https://upload.pypi.org/legacy/
+- cmd: set TESTREPO=https://test.pypi.org/legacy/
+- cmd: set USERNAME=%PYPI_USERNAME%
+# The package twine requires python >= 3.6, so
+# we upgrade python before doing anything related
+# to twine. Note that twine is only for publishing
+# packages, so this change won't affect the package
+# we built.
+- cmd: conda upgrade -y python
+# Ensure only master branch can trigger build
+- >
+  IF "%APPVEYOR_REPO_BRANCH%" == "master"
+  (
+  IF "%APPVEYOR_REPO_TAG%" == "true"
+  (
+  python -m pip install twine &&
+  set HOME=%USERPROFILE% &&
+  python -m twine upload --verbose --skip-existing %_wheel% --repository-url %REPO% -u %USERNAME% -p %PYPI_PASSWORD%
+  )
+  )
+- >
+  IF "%APPVEYOR_REPO_BRANCH%" == "pypi_test_win"
+  (
+  python -m pip install twine &&
+  set HOME=%USERPROFILE% &&
+  python -m twine upload --verbose --skip-existing %_wheel% --repository-url %TESTREPO% -u %USERNAME% -p %PYPI_PASSWORD%
+  )
+- cmd: echo TASK COMPLETED
