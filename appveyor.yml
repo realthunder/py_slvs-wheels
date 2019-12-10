@@ -100,14 +100,15 @@ for:
 
 install:
 - set repo_dir=py_slvs
-- set build_commit=4b140c34997e3b08527da7288e05cc2d3c8cd9f4
+# - set build_commit=ed6635d59411abfb0eb650cdc192b865aaab410c
 - git submodule update --init %repo_dir%
 - cd %repo_dir%
-- git fetch origin
-- git checkout %build_commit%
-- git clean -fxd
-- git reset --hard
+# - git fetch origin
+# - git checkout %build_commit%
+# - git clean -fxd
+# - git reset --hard
 - git submodule update --init slvs
+- cd ..
 
 build_script:
 # Build and test onnx.

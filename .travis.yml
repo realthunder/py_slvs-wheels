@@ -1,7 +1,7 @@
 env:
   global:
     - REPO_DIR=py_slvs
-    - BUILD_COMMIT=90f2f9005c9e102d7de6dd3e8407d820c08dbcc4
+    - BUILD_COMMIT=ed6635d59411abfb0eb650cdc192b865aaab410c
     - BUILD_DEPENDS="cython cmake scikit-build"
     - TEST_DEPENDS=pytest
     - PLAT=x86_64
@@ -102,16 +102,16 @@ matrix:
       - PLAT=i686
 
 before_install:
-  - source multibuild/common_utils.sh;
-  - source multibuild/travis_steps.sh;
-  - before_install;
+- source multibuild/common_utils.sh;
+- source multibuild/travis_steps.sh;
+- before_install;
 
 install:
-  - clean_code $REPO_DIR $BUILD_COMMIT;
+  # - clean_code $REPO_DIR $BUILD_COMMIT;
   - build_wheel $REPO_DIR $PLAT;
 
 script:
-  - install_run $PLAT
+- install_run $PLAT
 
 after_success:
 - >
