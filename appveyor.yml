@@ -55,6 +55,10 @@ environment:
     PYTHON_VERSION_MINOR: 7
     CONDA_PREFIX: C:\Miniconda37-x64
 
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 8
+    CONDA_PREFIX: C:\Miniconda38-x64
+
 matrix:
   exclude:
   - image: Visual Studio 2013 

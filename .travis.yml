@@ -13,6 +13,7 @@ env:
 
 language: python
 # Default Python version is usually 2.7
+os: linux
 python: 3.5
 dist: trusty
 services: docker
@@ -20,85 +21,82 @@ services: docker
 # https://github.com/python-pillow/pillow-wheels/issues/45
 # So we have the line below for OSX builds
 # osx_image: xcode9.3beta
-matrix:
+jobs:
   # Exclude the default Python 3.5 build
-  exclude:
-  - python: 3.5
   include:
   - os: osx
     language: generic
-    sudo: required
     osx_image: xcode9.3beta
     env:
       - MB_PYTHON_VERSION=3.5
       - MACOSX_DEPLOYMENT_TARGET=10.9
   - os: osx
     language: generic
-    sudo: required
     osx_image: xcode9.3beta
     env:
       - MB_PYTHON_VERSION=3.6
       - MACOSX_DEPLOYMENT_TARGET=10.9
   - os: osx
     language: generic
-    sudo: required
     osx_image: xcode9.3beta
     env:
       - MB_PYTHON_VERSION=3.7
       - MACOSX_DEPLOYMENT_TARGET=10.9
   - os: osx
     language: generic
-    sudo: required
+    osx_image: xcode9.3beta
+    env:
+      - MB_PYTHON_VERSION=3.8
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: osx
+    language: generic
     osx_image: xcode9.3beta
     env:
       - MB_PYTHON_VERSION=2.7
       - MACOSX_DEPLOYMENT_TARGET=10.9
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=2.7 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=2.7 
       - UNICODE_WIDTH=16 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=2.7 
       - PLAT=i686 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=2.7 
       - UNICODE_WIDTH=16 
       - PLAT=i686 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=3.5 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=3.6 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=3.7 
   - os: linux 
-    sudo: required 
+    env: 
+      - MB_PYTHON_VERSION=3.8 
+  - os: linux 
     env: 
       - MB_PYTHON_VERSION=3.5 
       - PLAT=i686 
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=3.6 
       - PLAT=i686
   - os: linux 
-    sudo: required 
     env: 
       - MB_PYTHON_VERSION=3.7 
+      - PLAT=i686
+  - os: linux 
+    env: 
+      - MB_PYTHON_VERSION=3.8 
       - PLAT=i686
 
 before_install:
