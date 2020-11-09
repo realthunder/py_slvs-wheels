@@ -5,7 +5,7 @@ version: 1.0.{build}
 # build all branches by default
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   - Visual Studio 2013
 platform: x64
 configuration: Release
@@ -57,13 +57,17 @@ environment:
 
   - PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 8
+    CONDA_PREFIX: C:\Miniconda38
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 8
     CONDA_PREFIX: C:\Miniconda38-x64
 
 matrix:
   exclude:
   - image: Visual Studio 2013 
     PYTHON_VERSION_MAJOR: 3
-  - image: Visual Studio 2017 
+  - image: Visual Studio 2019 
     PYTHON_VERSION_MAJOR: 2
 
 for:
@@ -117,7 +121,7 @@ install:
 build_script:
 # Build and test onnx.
 - cd c:\projects\py_slvs-wheels\py_slvs
-- python setup.py bdist_wheel --universal --dist-dir .
+- python setup.py bdist_wheel --universal --dist-dir . -- -- -w dupbuild=warn
 - pip uninstall -y py_slvs || ver>nul
 - dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
 - pip install %_wheel%
