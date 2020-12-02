@@ -5,6 +5,7 @@ version: 1.0.{build}
 # build all branches by default
 
 image:
+  - Visual Studio 2019
   - Visual Studio 2017
   - Visual Studio 2013
 platform: x64
@@ -65,6 +66,20 @@ matrix:
     PYTHON_VERSION_MAJOR: 3
   - image: Visual Studio 2017 
     PYTHON_VERSION_MAJOR: 2
+  - image: Visual Studio 2019 
+    PYTHON_VERSION_MAJOR: 2
+  - image: Visual Studio 2017 
+    PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 8
+  - image: Visual Studio 2019 
+    PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 5
+  - image: Visual Studio 2019 
+    PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 6
+  - image: Visual Studio 2019 
+    PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 7
 
 for:
 -
