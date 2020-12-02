@@ -5,7 +5,7 @@ version: 1.0.{build}
 # build all branches by default
 
 image:
-  - Visual Studio 2019
+  - Visual Studio 2017
   - Visual Studio 2013
 platform: x64
 configuration: Release
@@ -57,17 +57,13 @@ environment:
 
   - PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 8
-    CONDA_PREFIX: C:\Miniconda38
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 8
     CONDA_PREFIX: C:\Miniconda38-x64
 
 matrix:
   exclude:
   - image: Visual Studio 2013 
     PYTHON_VERSION_MAJOR: 3
-  - image: Visual Studio 2019 
+  - image: Visual Studio 2017 
     PYTHON_VERSION_MAJOR: 2
 
 for:
