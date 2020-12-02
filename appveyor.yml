@@ -91,8 +91,8 @@ for:
   - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
   - set _prefix=%CONDA_PREFIX:~0,14%
   - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
-  - conda install -y -c conda-forge --no-update-deps swig=3.0.12
-  - pip install --quiet setuptools scikit-build
+  - conda install -y -c conda-forge --no-update-deps swig=3.0.12 ninja=1.8.2
+  - pip install --quiet ninja==1.8.2 setuptools scikit-build
 -
   matrix:
     only:
@@ -103,8 +103,8 @@ for:
   - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
   - set _prefix=%CONDA_PREFIX:~0,14%
   - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
-  - conda install -y -c conda-forge swig
-  - pip install --quiet scikit-build
+  - conda install -y -c conda-forge swig ninja=1.8.2
+  - pip install --quiet ninja==1.8.2 scikit-build
 
 install:
 - set repo_dir=py_slvs
@@ -121,7 +121,7 @@ install:
 build_script:
 # Build and test onnx.
 - cd c:\projects\py_slvs-wheels\py_slvs
-- python setup.py bdist_wheel --universal --dist-dir . -- -- -w dupbuild=warn
+- python setup.py bdist_wheel --universal --dist-dir .
 - pip uninstall -y py_slvs || ver>nul
 - dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
 - pip install %_wheel%
