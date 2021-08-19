@@ -32,33 +32,53 @@ environment:
   #   PY_PREFIX: C:\Python27-x64
   #   CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
 
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 5
+  #   PY_PREFIX: C:\Python35
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 5
+  #   CONDA_PREFIX: C:\Python35-x64
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 6
+  #   PY_PREFIX: C:\Python36
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 6
+  #   PY_PREFIX: C:\Python36-x64
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 7
+  #   PY_PREFIX: C:\Python37
+  #
+  # - PYTHON_VERSION_MAJOR: 3
+  #   PYTHON_VERSION_MINOR: 7
+  #   PY_PREFIX: C:\Python37-x64
+  #
   - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 5
-    CONDA_PREFIX: C:\Miniconda35
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 5
-    CONDA_PREFIX: C:\Miniconda35-x64
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 6
-    CONDA_PREFIX: C:\Miniconda36
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 6
-    CONDA_PREFIX: C:\Miniconda36-x64
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 7
-    CONDA_PREFIX: C:\Miniconda37
-
-  - PYTHON_VERSION_MAJOR: 3
-    PYTHON_VERSION_MINOR: 7
-    CONDA_PREFIX: C:\Miniconda37-x64
+    PYTHON_VERSION_MINOR: 8
+    PY_PREFIX: C:\Python38
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax86"
 
   - PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 8
-    CONDA_PREFIX: C:\Miniconda38-x64
+    PY_PREFIX: C:\Python38-x64
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax64"
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 9
+    PY_PREFIX: C:\Python39
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax86"
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 9
+    PY_PREFIX: C:\Python39-x64
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax64"
 
 matrix:
   exclude:
@@ -71,6 +91,9 @@ matrix:
   - image: Visual Studio 2017 
     PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 8
+  - image: Visual Studio 2017 
+    PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 9
   - image: Visual Studio 2019 
     PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 5
@@ -81,41 +104,13 @@ matrix:
     PYTHON_VERSION_MAJOR: 3
     PYTHON_VERSION_MINOR: 7
 
-for:
--
-  matrix:
-    only:
-    - PYTHON_VERSION_MAJOR: 2
-  before_build:
+before_build:
   - set PATH=%PY_PREFIX%;%PY_PREFIX%/Scripts;%PATH% 
   - pip install --quiet scikit-build
   - curl -Lfso swig.zip https://downloads.sourceforge.net/project/swig/swigwin/swigwin-4.0.1/swigwin-4.0.1.zip
   - 7z x swig.zip -y
   - move swigwin-4.0.1 C:\
   - set PATH=C:\swigwin-4.0.1;%PATH%
--
-  matrix:
-    only:
-    - PYTHON_VERSION_MAJOR: 3
-      PYTHON_VERSION_MINOR: 5
-  before_build:
-  - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
-  - set _prefix=%CONDA_PREFIX:~0,14%
-  - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
-  - conda install -y -c conda-forge --no-update-deps swig=3.0.12
-  - pip install --quiet setuptools scikit-build
--
-  matrix:
-    only:
-    - PYTHON_VERSION_MAJOR: 3
-    except:
-    - PYTHON_VERSION_MINOR: 5
-  before_build:
-  - set PATH=%CONDA_PREFIX%;%CONDA_PREFIX%\Scripts;%PATH%
-  - set _prefix=%CONDA_PREFIX:~0,14%
-  - set PATH=%PATH%;%CONDA_PREFIX%\Library\bin
-  - conda install -y -c conda-forge swig
-  - pip install --quiet scikit-build
 
 install:
 - set repo_dir=py_slvs
@@ -132,7 +127,8 @@ install:
 build_script:
 # Build and test onnx.
 - cd c:\projects\py_slvs-wheels\py_slvs
-- python setup.py bdist_wheel --universal --dist-dir .
+- set PATH=%PY_PREFIX%;%PY_PREFIX%/Scripts;%PATH% 
+- python setup.py bdist_wheel --universal --dist-dir . -- -G "%CMAKE_GENERATOR%" %CMAKE_ARCH%
 - pip uninstall -y py_slvs || ver>nul
 - dir /b /a-d "*.whl" >WheelFile.txt & set /p _wheel= < WheelFile.txt
 - pip install %_wheel%
@@ -147,8 +143,7 @@ after_test:
 - set REPO=https://upload.pypi.org/legacy/
 - set TESTREPO=https://test.pypi.org/legacy/
 - set USERNAME=%PYPI_USERNAME%
-# force use python 3.7 for twine (because it requires python>=3.6)
-- set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
+- set PATH=%PY_PREFIX%;%PY_PREFIX%/Scripts;%PATH% 
 # Ensure only master branch can trigger build
 - >
   IF "%APPVEYOR_REPO_BRANCH%" == "master"
