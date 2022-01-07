@@ -15,7 +15,7 @@ function build_libs() {
         pcre_dir="./cache/pcre"
         mkdir -p "$pcre_dir"
         pcre_ver=8.38
-        curl -L -O https://ftp.pcre.org/pub/pcre/pcre-$pcre_ver.tar.gz
+        curl -L -O https://downloads.sourceforge.net/project/pcre/pcre/$pcre_ver/pcre-$pcre_ver.tar.gz
         tar xf pcre-$pcre_ver.tar.gz -C "$pcre_dir" --strip-components 1
         cd "$pcre_dir" \
             && ./configure \
