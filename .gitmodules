@@ -3,4 +3,4 @@
 	url = https://github.com/realthunder/slvs_py.git
 [submodule "multibuild"]
 	path = multibuild
-	url = https://github.com/matthew-brett/multibuild.git
+	url = https://github.com/realthunder/multibuild.git
