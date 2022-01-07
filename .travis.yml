@@ -53,12 +53,12 @@ jobs:
   #   env:
   #     - MB_PYTHON_VERSION=3.9
   #     - MACOSX_DEPLOYMENT_TARGET=10.9
-  # - os: osx
-  #   language: generic
-  #   osx_image: xcode9.3beta
-  #   env:
-  #     - MB_PYTHON_VERSION=3.10
-  #     - MACOSX_DEPLOYMENT_TARGET=10.9
+  - os: osx
+    language: generic
+    osx_image: xcode10.2
+    env:
+      - MB_PYTHON_VERSION=3.10
+      - MACOSX_DEPLOYMENT_TARGET=10.9
   # - os: osx
   #   language: generic
   #   osx_image: xcode9.3beta
@@ -96,9 +96,9 @@ jobs:
   # - os: linux
   #   env:
   #     - MB_PYTHON_VERSION=3.9
-  - os: linux 
-    env: 
-      - MB_PYTHON_VERSION=3.10 
+  # - os: linux
+  #   env:
+  #     - MB_PYTHON_VERSION=3.10
   # - os: linux
   #   env:
   #     - MB_PYTHON_VERSION=3.5
