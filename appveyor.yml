@@ -80,6 +80,18 @@ environment:
     CMAKE_GENERATOR: "Visual Studio 16 2019"
     CMAKE_ARCH: "-Ax64"
 
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 10
+    PY_PREFIX: C:\Python310
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax86"
+
+  - PYTHON_VERSION_MAJOR: 3
+    PYTHON_VERSION_MINOR: 10
+    PY_PREFIX: C:\Python310-x64
+    CMAKE_GENERATOR: "Visual Studio 16 2019"
+    CMAKE_ARCH: "-Ax64"
+
 matrix:
   exclude:
   # - image: Visual Studio 2013
