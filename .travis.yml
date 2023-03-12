@@ -47,22 +47,32 @@ jobs:
       - MB_PYTHON_VERSION=3.10
       - MACOSX_DEPLOYMENT_TARGET=10.9
       - PLAT=universal2
+  - os: osx
+    language: generic
+    osx_image: xcode12.5
+    env:
+      - MB_PYTHON_VERSION=3.11
+      - MACOSX_DEPLOYMENT_TARGET=10.9
+      - PLAT=universal2
 
-  # - os: linux
-  #   env:
-  #     - MB_PYTHON_VERSION=3.6
-  # - os: linux
-  #   env:
-  #     - MB_PYTHON_VERSION=3.7
-  # - os: linux
-  #   env:
-  #     - MB_PYTHON_VERSION=3.8
-  # - os: linux
-  #   env:
-  #     - MB_PYTHON_VERSION=3.9
-  # - os: linux
-  #   env:
-  #     - MB_PYTHON_VERSION=3.10
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.6
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.7
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.8
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.9
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.10
+  - os: linux
+    env:
+      - MB_PYTHON_VERSION=3.11
 
 before_install:
 - source multibuild/common_utils.sh;
